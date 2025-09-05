@@ -1,18 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./style.css">
-    <title>Craquignole</title>
+    <title>Feux d'artifice de coeurs</title>
+    <style>
+        body {
+            background-color: #000;
+            overflow: hidden;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 100vh;
+        }
+
+        #fireworks-btn {
+            position: fixed;
+            bottom: 20px;
+            padding: 1rem 2rem;
+            font-size: 1.25rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 0.5rem;
+            background-color: #ff4500;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        #fireworks-btn:hover {
+            background-color: #ff6347;
+            transform: translateY(-2px);
+        }
+
+        #fireworks-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
 <body>
-    <div class="center">
-        <span>&#x1F496;</span>
-        <h1>JE T'AIME.</h1>
-        <h1>NOUS T'AIMONS.</h1>
-        <h1>POUR TOUJOURS!</h1>
-        <span>&#x1F496;</span>
-    </div>
+    <button id="fireworks-btn">Lancer les feux d'artifice</button>
+    <canvas id="fireworks-canvas"></canvas>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('fireworks-canvas');
+            const ctx = canvas.getContext('2d');
+            const button = document.getElementById('fireworks-btn');
+
+            // Set canvas size to match the window
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            
+            const emojis = ['❤️', '🧡', '💛', '💚', '💙', '💜', '💖', '🤍'];
+
+            // Class to create a firework particle (now an emoji)
+            class Particle {
+                constructor(x, y, emoji) {
+                    this.x = x;
+                    this.y = y;
+                    this.vx = (Math.random() - 0.5) * 10;
+                    this.vy = (Math.random() - 0.5) * 10;
+                    this.size = Math.random() * 20 + 10; // Emoji are larger than circles
+                    this.emoji = emoji;
+                    this.alpha = 1;
+                    this.friction = 0.99;
+                    this.gravity = 0.1;
+                }
+
+                update() {
+                    this.vy += this.gravity;
+                    this.vx *= this.friction;
+                    this.vy *= this.friction;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.alpha -= 0.015;
+                }
+
+                draw() {
+                    ctx.globalAlpha = this.alpha;
+                    ctx.font = `${this.size}px serif`; // Set the font for the emoji
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.emoji, this.x, this.y); // Draw the emoji
+                }
+            }
+
+            // Function to create a firework explosion at a random position
+            function createFireworks() {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                for (let i = 0; i < 150; i++) {
+                    particles.push(new Particle(x, y, emoji));
+                }
+            }
+
+            // Animation loop
+            function animate() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    particles[i].update();
+                    particles[i].draw();
+
+                    if (particles[i].alpha <= 0) {
+                        particles.splice(i, 1);
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+
+            // Handle button click to launch fireworks
+            button.addEventListener('click', () => {
+                createFireworks();
+            });
+
+            // Start the animation loop
+            animate();
+
+            // Resize the canvas if the window size changes
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
 </body>
 </html>
